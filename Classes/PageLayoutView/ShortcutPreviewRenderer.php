@@ -38,6 +38,9 @@ use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconSize;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 
 class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
 {
@@ -80,23 +83,23 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         $infoArr = [];
         $this->getProcessedValue($item, 'header_position,header_layout,header_link', $infoArr);
         $tsConfig = BackendUtility::getPagesTSconfig($record['pid'])['mod.']['web_layout.']['tt_content.']['preview.'] ?? [];
-        if (!empty($tsConfig[$record['CType']]) || !empty($tsConfig[$record['CType'] . '.'])) {
-            $fluidPreview = $this->renderContentElementPreviewFromFluidTemplate($record);
-            if ($fluidPreview !== null) {
-                return $fluidPreview;
-            }
-        }
 
         if (!empty($record['records'])) {
             $shortCutRenderItems = $this->addShortcutRenderItems($item);
             $preview = '';
+            $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
             foreach ($shortCutRenderItems as $shortcutRecord) {
                 $shortcutItem = GeneralUtility::makeInstance(GridColumnItem::class, $item->getContext(), $item->getColumn(), $shortcutRecord);
-                $preview .= '<p class="pt-2 small"><b><a href="' . $shortcutItem->getEditUrl() . '">' . $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:edit') . '</a></b></p>';
-                $preview .= '<div class="mb-2 p-2 border reference">' . $shortcutItem->getPreview() . '<div class="reference-overlay"></div></div>';
+                $editIcon = $iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)->render();
+                $preview .= '<a href="' . $shortcutItem->getEditUrl() . '" class="btn btn-default btn-sm btn-reference">' 
+                . $editIcon . ' '
+                . $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:edit') 
+                . '</a>';
+                $preview .= '<div class="reference">' . $shortcutItem->getPreview() . '<div class="reference-overlay"></div></div>';
             }
             return $preview;
         }
+
 
         return parent::renderPageModulePreviewContent($item);
     }
@@ -147,6 +150,8 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
 
     /**
      * Collects tt_content data from a single page or a page tree starting at a given page
+     *
+     * @todo: move this in a repository
      *
      * @param string $shortcutItem The single page to be used as the tree root
      * @param array<int, array<non-empty-string, mixed>> $collectedItems The collected item data rows ordered by parent position, column position and sorting
@@ -212,6 +217,8 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
 
     /**
      * Collects tt_content data from a single tt_content element
+     *
+     * @todo: move this in a repository
      *
      * @param string $shortcutItem The tt_content element to fetch the data from
      * @param array<int, array<non-empty-string, mixed>> $collectedItems The collected item data row
