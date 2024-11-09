@@ -25,6 +25,14 @@ border-spacing: calc(var(--pagemodule-grid-spacing) / 1.5 );
     background-color: rgba(0,0,0, .05);
 }
 
+.t3js-page-ce:has([class*="reference"]) .t3-page-ce-dragitem .t3-page-ce-header-draggable:hover { 
+    background-color: hsla(from var(--token-color-teal-50) h s l / 20%);
+}
+
+.t3-page-ce-element:has([class*="reference"]) {
+    border-color: hsla(from var(--token-color-teal-50) h s l / 50%);
+}
+
 .t3-page-ce-danger > .t3-page-ce-header,
 .t3-page-ce-danger > div > .t3-page-ce-header {
 	background-color: hsla(from var(--bs-danger) h s l / 50%) !important;
